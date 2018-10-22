@@ -18,7 +18,32 @@ export function formatTime(date) {
   return `${t1} ${t2}`;
 }
 
+export function calPictureSize(canvas, picture) {
+  let width = 0;
+  let height = 0;
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
+  const pictureWidth = picture.width;
+  const pictureHeight = picture.height;
+
+  const canvasRatio = canvasWidth / canvasHeight;
+  const pictureRatio = pictureWidth / pictureHeight;
+
+  if (canvasRatio > pictureRatio) {
+    width = (pictureWidth / pictureHeight) * canvasHeight;
+    height = canvasHeight;
+  } else {
+    width = canvasWidth;
+    height = (pictureHeight / pictureWidth) * canvasWidth;
+  }
+  return {
+    width,
+    height,
+  };
+}
+
 export default {
   formatNumber,
   formatTime,
+  calPictureSize,
 };
