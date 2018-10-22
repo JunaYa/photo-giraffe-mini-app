@@ -5,6 +5,7 @@ export default {
 
 <style>
   body{
+    position: fixed;
     height: 100%;
   }
 </style>
