@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <HeaderLayout :title="否TA"/>
     <div class="btn_select_picture"
          @click="selectPicture">
       选取图片
@@ -12,6 +13,7 @@
 
 <script>
   import Picture from '@/components/Picture';
+  import HeaderLayout from '@/components/Header';
 
   export default {
     data() {
@@ -22,6 +24,7 @@
 
     components: {
       Picture,
+      HeaderLayout,
     },
 
     methods: {
@@ -67,6 +70,6 @@
 
 <style scoped>
   .container {
-
   }
+
 </style>
