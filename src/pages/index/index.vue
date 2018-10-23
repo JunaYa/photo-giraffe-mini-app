@@ -44,13 +44,12 @@
         </div>
       </div>
     </div>
-    <span
+    <LeeButton
       v-if="!background"
-      class="btn-select-picture"
-      ref="span"
-      @click="addBackground">
-      选择图片
-    </span>
+      :text="'选择图片'"
+      :offset-top="'60%'"
+      @click="addBackground"
+    />
     <div
       v-if="background && !isCanvas"
       class="options-layout"
@@ -137,6 +136,7 @@
 <script>
   import Picture from '@/components/Picture';
   import HeaderLayout from '@/components/Header';
+  import LeeButton from '@/components/LeeButton';
   import {
     calPictureSize,
     selectPicture,
@@ -161,6 +161,7 @@
     },
 
     components: {
+      LeeButton,
       Picture,
       HeaderLayout,
     },
@@ -338,20 +339,6 @@
   .container {
     position: relative;
     height: 100%;
-  }
-
-  .btn-select-picture {
-    font-size: .32rem;
-    color: #333333;
-    margin: 0 auto;
-    padding: .16rem .48rem;
-    border: .01rem solid #999999;
-    border-radius: .06rem;
-    box-shadow: 0 .2rem .4rem rgba(0, 0, 0, .15);
-    position: absolute;
-    top: 60%;
-    left: 50%;
-    transform: translate(-50%, 0);
   }
 
   .options-board {
