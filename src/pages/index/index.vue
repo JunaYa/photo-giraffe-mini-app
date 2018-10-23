@@ -173,6 +173,7 @@
 
     mounted() {
       this.context = wx.createCanvasContext('canvas');
+      this.getUserInfo();
     },
 
     computed: {
@@ -188,6 +189,7 @@
             wx.getUserInfo({
               success: (res) => {
                 this.userInfo = res.userInfo;
+                console.log(this.userInfo);
               },
             });
           },
@@ -214,9 +216,10 @@
             width,
             height,
           } = calPictureSize(this.canvasConfig, info);
-          const picture = info;
-          picture.width = width;
-          picture.height = height;
+          this.currentPicture = info;
+          this.currentPicture.width = width;
+          this.currentPicture.height = height;
+          this.pictures.push(this.currentPicture);
         });
       },
 
@@ -298,6 +301,12 @@
         this.texts.forEach((textItem) => {
           this.context.setFontSize(16);
           this.context.fillText(textItem.value, textItem.x, textItem.y, 100);
+        });
+
+        this.pictures.forEach((pictureItem) => {
+          const w = pictureItem.width - (margin * 2);
+          const h = pictureItem.height - (margin * 2);
+          this.context.drawImage(pictureItem.path, x, y, w / 4, h / 4);
         });
         this.context.draw();
         this.isCanvas = true;
@@ -395,10 +404,20 @@
     bottom: 0;
   }
 
+  .text-group,
+  .picture-group {
+    position: absolute;
+  }
+
   .text-item {
     position: absolute;
     font-size: .32rem;
     color: #333333;
+    border: .01rem solid #999999;
+  }
+
+  .picture-item {
+    position: absolute;
     border: .01rem solid #999999;
   }
 
