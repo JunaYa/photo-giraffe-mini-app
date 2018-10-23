@@ -3,6 +3,7 @@
     :src="picture.path"
     class="picture"
     mode="aspectFit"
+    :style="imageStyle"
   >
   </image>
 </template>
@@ -16,12 +17,20 @@
           required: true,
         },
       },
+      computed: {
+        imageStyle() {
+          const margin = 4;
+          const x = margin;
+          const y = margin;
+          const width = this.picture.width - (margin * 2);
+          const height = this.picture.height - (margin * 2);
+          return `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
+        },
+      },
     };
 </script>
 
 <style scoped>
   image {
-    width: 8rem;
-    height: 12rem;
   }
 </style>

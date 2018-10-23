@@ -42,8 +42,35 @@ export function calPictureSize(canvas, picture) {
   };
 }
 
+function getPictureInfo(url) {
+  return new Promise((resolve) => {
+    wx.getImageInfo({
+      src: url,
+      success: data => resolve(data),
+    });
+  });
+}
+
+export function selectPicture() {
+  return new Promise((resolve) => {
+    wx.chooseImage({
+      count: 1,
+      sourceType: ['album', 'camera'],
+      sizeType: ['original', 'compressed'],
+      success: (res) => {
+        if (res.tempFiles.length > 0) {
+          getPictureInfo(res.tempFiles[0].path).then((info) => {
+            resolve(info);
+          });
+        }
+      },
+    });
+  });
+}
+
 export default {
   formatNumber,
   formatTime,
   calPictureSize,
+  selectPicture,
 };

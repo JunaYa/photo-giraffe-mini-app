@@ -1,23 +1,112 @@
 <template>
   <div class="container">
     <HeaderLayout :title="否TA"/>
-    <Picture
-      v-if="false"
-      :picture="picture"/>
+    <div
+      v-if="background && !isCanvas"
+      class="content-layout"
+      :style="canvasStyle"
+      >
+      <input
+        v-if="isTextWriting"
+        placeholder="内容"
+        @input="onInputText"
+        auto-focus/>
+      <Picture :picture="background"/>
+      <div
+        class="content-group"
+        :style="canvasStyle"
+      >
+        <div
+          class="text-group"
+          :style="canvasStyle"
+        >
+          <p
+            v-for="(textItem, textIndex) in texts"
+            :key="textIndex"
+            :style="{left: textItem.x + 'px;', top: textItem.y + 'px;'}"
+            class="text-item"
+          >
+            {{ textItem.value }}
+          </p>
+        </div>
+        <div
+          class="picture-group"
+          :style="canvasStyle"
+        >
+          <image
+            v-for="(pictureItem, pictureIndex) in pictures"
+            :key="pictureIndex"
+            :src="pictureItem.path"
+            :style="{left: pictureItem.x + 'px;', top: pictureItem.y + 'px;'}"
+            class="picture-item"
+          >
+          </image>
+        </div>
+      </div>
+    </div>
     <span
-      v-if="!picture"
+      v-if="!background"
       class="btn-select-picture"
       ref="span"
-      @click="selectPicture">
+      @click="addBackground">
       选择图片
     </span>
-    <input
-      v-if="isTextWriting"
-      placeholder="内容"
-      @input="onInputText"
-      auto-focus/>
+    <div
+      v-if="background && !isCanvas"
+      class="options-layout"
+    >
+      <div
+        v-if="!isTextWriting"
+        :class="{'options-item-isShow': background}"
+        class="options-item"
+        @touchstart="addBackground">
+        重置
+      </div>
+      <div
+        v-if="!isTextWriting"
+        :class="{'options-item-isShow': background}"
+        class="options-item"
+        @touchstart="addText">
+        文字
+      </div>
+      <div
+        v-if="!isTextWriting"
+        :class="{'options-item-isShow': background}"
+        class="options-item"
+        @touchstart="addPicture">
+        图片
+      </div>
+      <div
+        v-if="!isTextWriting && isCanvas"
+        :class="{'options-item-isShow': background}"
+        class="options-item"
+        @touchstart="savePicture">
+        保存
+      </div>
+      <div
+        v-if="!isTextWriting && !isCanvas"
+        :class="{'options-item-isShow': background}"
+        class="options-item"
+        @touchstart="drawCanvas">
+        作画
+      </div>
+      <div
+        v-if="isTextWriting"
+        :class="{'options-item-isShow': background}"
+        class="options-item"
+        @touchstart="cancelCurrentStep">
+        取消
+      </div>
+      <div
+        v-if="isTextWriting"
+        :class="{'options-item-isShow': background}"
+        class="options-item"
+        @touchstart="saveCurrentStep">
+        确定
+      </div>
+    </div>
     <canvas
-      v-if="picture"
+      v-if="isCanvas"
       :style="canvasStyle"
       canvas-id="canvas"
       @touchstart="handleTouchStart"
@@ -25,28 +114,17 @@
       @touchend="handleTouchMove"
     >
       <cover-view
+        v-if="background"
         class="options-layout"
       >
         <cover-view
-          :class="{'options-item-isShow': picture}"
+          :class="{'options-item-isShow': background}"
           class="options-item"
-          @touchstart="selectPicture">
-          重置
+          @touchstart="cancelSavePicture">
+          取消
         </cover-view>
         <cover-view
-          :class="{'options-item-isShow': picture}"
-          class="options-item"
-          @touchstart="addText">
-          文字
-        </cover-view>
-        <cover-view
-          :class="{'options-item-isShow': picture}"
-          class="options-item"
-          @touchstart="addPicture">
-          图片
-        </cover-view>
-        <cover-view
-          :class="{'options-item-isShow': picture}"
+          :class="{'options-item-isShow': background}"
           class="options-item"
           @touchstart="savePicture">
           保存
@@ -59,16 +137,26 @@
 <script>
   import Picture from '@/components/Picture';
   import HeaderLayout from '@/components/Header';
-  import { calPictureSize } from '@/utils/index';
+  import {
+    calPictureSize,
+    selectPicture,
+  } from '@/utils/index';
 
   export default {
     data() {
       return {
-        picture: null,
+        background: null,
+        pictures: [],
+        texts: [],
+        tree: null,
         context: null,
-        dom: null,
         canvasConfig: {},
+        currentText: {},
+        currentPicture: {},
         isTextWriting: false,
+        isPictureEditing: false,
+        isCanvas: false,
+        step: -1,
       };
     },
 
@@ -92,12 +180,7 @@
         return `width: ${this.canvasConfig.width}px; height: ${this.canvasConfig.height}px;`;
       },
     },
-    watch: {
-      picture() {
-        this.drawCanvas();
-        this.context.draw();
-      },
-    },
+
     methods: {
       getUserInfo() {
         wx.login({
@@ -111,41 +194,52 @@
         });
       },
 
-      selectPicture() {
-        wx.chooseImage({
-          count: 1,
-          sourceType: ['album', 'camera'],
-          sizeType: ['original', 'compressed'],
-          success: (res) => {
-            if (res.tempFiles.length > 0) {
-              this.getPictureInfo(res.tempFiles[0].path).then((info) => {
-                this.picture = info;
-                const {
-                  width,
-                  height,
-                } = calPictureSize(this.canvasConfig, this.picture);
-                this.picture.width = width;
-                this.picture.height = height;
-              });
-            }
-          },
+      addBackground() {
+        wx.vibrateShort();
+        selectPicture().then((info) => {
+          const {
+            width,
+            height,
+          } = calPictureSize(this.canvasConfig, info);
+          this.background = info;
+          this.background.width = width;
+          this.background.height = height;
         });
       },
 
-      addPicture() {},
+      addPicture() {
+        wx.vibrateShort();
+        selectPicture().then((info) => {
+          const {
+            width,
+            height,
+          } = calPictureSize(this.canvasConfig, info);
+          const picture = info;
+          picture.width = width;
+          picture.height = height;
+        });
+      },
 
       addText() {
+        wx.vibrateShort();
         this.isTextWriting = true;
       },
 
+      cancelSavePicture() {
+        wx.vibrateShort();
+        this.isCanvas = false;
+      },
+
       savePicture() {
+        wx.vibrateShort();
         const margin = 4;
         const xValue = margin;
         const yValue = margin;
         const canvasWidth = this.canvasConfig.width;
         const canvasHeight = this.canvasConfig.height;
-        const widthValue = this.picture.width - (margin * 2);
-        const heightValue = this.picture.height - (margin * 2);
+        const widthValue = this.background.width - (margin * 2);
+        const heightValue = this.background.height - (margin * 2);
+
         wx.canvasToTempFilePath({
           x: xValue,
           y: yValue,
@@ -168,27 +262,51 @@
         });
       },
 
-      getPictureInfo(url) {
-        return new Promise((resolve) => {
-          wx.getImageInfo({
-            src: url,
-            success: data => resolve(data),
-          });
-        });
+      saveCurrentStep() {
+        wx.vibrateShort();
+        if (this.isTextWriting) {
+          this.texts.push(this.currentText);
+          this.isTextWriting = false;
+          this.currentText = {};
+        } else if (this.isPictureEditing) {
+          this.pictures.push(this.currentPicture);
+          this.isPictureEditing = false;
+          this.currentPicture = {};
+        }
+      },
+
+      cancelCurrentStep() {
+        wx.vibrateShort();
+        if (this.isTextWriting) {
+          this.isTextWriting = false;
+          this.currentText = {};
+        } else if (this.isPictureEditing) {
+          this.isPictureEditing = false;
+          this.currentPicture = {};
+        }
       },
 
       drawCanvas() {
-        if (!this.picture) return;
+        if (!this.background) return;
         const margin = 4;
         const x = margin;
         const y = margin;
-        const width = this.picture.width - (margin * 2);
-        const height = this.picture.height - (margin * 2);
-        this.context.drawImage(this.picture.path, x, y, width, height);
+        const width = this.background.width - (margin * 2);
+        const height = this.background.height - (margin * 2);
+        this.context.drawImage(this.background.path, x, y, width, height);
+
+        this.texts.forEach((textItem) => {
+          this.context.setFontSize(16);
+          this.context.fillText(textItem.value, textItem.x, textItem.y, 100);
+        });
+        this.context.draw();
+        this.isCanvas = true;
       },
 
       onInputText(res) {
-        console.log(res);
+        this.currentText.value = res.mp.detail.value;
+        this.currentText.x = res.mp.target.offsetLeft;
+        this.currentText.y = res.mp.target.offsetTop;
       },
 
       handleTouchStart(event) {
@@ -209,7 +327,8 @@
 
 <style scoped>
   .container {
-
+    position: relative;
+    height: 100%;
   }
 
   .btn-select-picture {
@@ -226,15 +345,21 @@
     transform: translate(-50%, 0);
   }
 
+  .options-board {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
   .options-layout {
     position: absolute;
-    z-index: 999;
     right: .48rem;
     bottom: .68rem;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
     justify-items: center;
+    z-index: 999;
   }
 
   .options-item {
@@ -257,6 +382,26 @@
     transition: .8s cubic-bezier(.2, .8, .2, 1);
   }
 
+  .content-layout {
+    position: relative;
+  }
+
+  .content-group {
+    position: absolute;
+    z-index: 33;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .text-item {
+    position: absolute;
+    font-size: .32rem;
+    color: #333333;
+    border: .01rem solid #999999;
+  }
+
   canvas {
     margin: 0 auto;
     border-radius: .05rem;
@@ -265,8 +410,9 @@
 
   input {
     position: absolute;
+    left: 50%;
     top: 50%;
-    margin: 0 auto;
+    transform: translate(-50%, 0);
     border-bottom: .01rem solid #999999;
     font-size: .32rem;
   }
