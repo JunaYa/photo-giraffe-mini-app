@@ -42,7 +42,7 @@ export function calPictureSize(canvas, picture) {
   };
 }
 
-function getPictureInfo(url) {
+export function getPictureInfo(url) {
   return new Promise((resolve) => {
     wx.getImageInfo({
       src: url,
@@ -68,9 +68,23 @@ export function selectPicture() {
   });
 }
 
+export function fetchPicture(path) {
+  return new Promise((resolve) => {
+    wx.downloadFile({
+      url: path,
+      success(res) {
+        if (res.statusCode === '200') {
+          resolve(res.tempFilePath);
+        }
+      },
+    });
+  });
+}
+
 export default {
   formatNumber,
   formatTime,
   calPictureSize,
+  getPictureInfo,
   selectPicture,
 };
