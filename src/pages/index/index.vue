@@ -187,6 +187,19 @@
           height + (margin * 2),
           100,
         );
+        const quotes = [
+          '早放学，早回家!',
+        ];
+
+        const index = parseInt(Math.random() * quotes.length, 0);
+        const quote = quotes[index];
+        this.context.fillText(
+          quote,
+          margin,
+          height + (margin * 3.5),
+          width,
+        );
+
         this.context.save();
 
         const iX = margin * 1.5;
@@ -197,6 +210,7 @@
         this.context.arc(iX + (iW / 2), iY + (iH / 2), iW / 2, 0, 2 * Math.PI);
         this.context.clip();
         this.context.drawImage(this.userInfo.picturePath, iX, iY, iW, iH);
+
         this.context.restore();
 
         this.context.draw();
