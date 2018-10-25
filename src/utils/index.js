@@ -81,10 +81,32 @@ export function fetchPicture(path) {
   });
 }
 
+export function getPostcards() {
+  let postcards = [];
+  try {
+    postcards = wx.getStorageSync('postcards');
+  } catch (e) {
+    //
+  }
+  return postcards || [];
+}
+
+export function setPostcards(path) {
+  const postcards = getPostcards();
+  postcards.push(path);
+  try {
+    wx.setStorageSync('postcards', postcards);
+  } catch (e) {
+    //
+  }
+}
+
 export default {
   formatNumber,
   formatTime,
   calPictureSize,
   getPictureInfo,
   selectPicture,
+  getPostcards,
+  setPostcards,
 };

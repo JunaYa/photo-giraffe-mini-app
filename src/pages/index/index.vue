@@ -1,6 +1,11 @@
 <template>
   <div class="container">
-    <HeaderLayout :title="否TA"/>
+    <HeaderLayout
+      :title="'@TA'"
+      :show-button="isCanvas"
+      @clickCancel="cancelSavePicture"
+      @clickConfirm="savePicture"
+    />
     <p class="description">
       选取一张图片作为背景，将信息合成为一张新图
     </p>
@@ -21,18 +26,6 @@
       @touchmove="handleTouchMove"
       @touchend="handleTouchMove"
     >
-      <cover-view class="options-layout">
-        <cover-view
-          class="options-item options-item-isShow"
-          @touchstart="cancelSavePicture">
-          取消
-        </cover-view>
-        <cover-view
-          class="options-item options-item-isShow"
-          @touchstart="savePicture">
-          保存
-        </cover-view>
-      </cover-view>
     </canvas>
   </div>
 </template>
@@ -42,6 +35,7 @@
   import {
     calPictureSize,
     selectPicture,
+    setPostcards,
   } from '@/utils/index';
 
   export default {
@@ -61,7 +55,7 @@
     created() {
       const systemInfo = wx.getSystemInfoSync();
       this.canvasConfig.width = systemInfo.windowWidth - 8;
-      this.canvasConfig.height = systemInfo.windowHeight - 80;
+      this.canvasConfig.height = systemInfo.windowHeight - 64;
     },
 
     mounted() {
@@ -93,11 +87,22 @@
       },
 
       getPicture(avatarUrl) {
+        wx.showLoading({
+          title: '努力加载ing…',
+        });
         return new Promise((resolve) => {
           wx.downloadFile({
             url: avatarUrl,
             success(res) {
+              wx.hideLoading();
               resolve(res.tempFilePath);
+            },
+            fail() {
+              wx.hideLoading();
+              wx.showModal({
+                title: '出了一 .. 小问题',
+                content: '可能是网络的小问题，再次尝试一下吧!',
+              });
             },
           });
         });
@@ -128,6 +133,7 @@
         const yValue = margin;
         const canvasWidth = this.canvasConfig.width;
         const canvasHeight = this.canvasConfig.height;
+        const self = this;
 
         wx.canvasToTempFilePath({
           x: xValue,
@@ -145,6 +151,10 @@
                   title: '保存成功!',
                   icon: 'success',
                 });
+                setTimeout(() => {
+                  self.isCanvas = false;
+                }, 300);
+                setPostcards(res.tempFilePath);
               },
             });
           },
@@ -165,9 +175,9 @@
         const rectH = this.canvasConfig.height - (blur * 2);
         this.context.fillRect(8, 8, rectW, rectH);
 
-        const margin = 38;
+        const margin = 28;
         const x = margin;
-        const y = margin / 2;
+        const y = margin;
         const width = this.postcard.width - (margin * 2);
         const height = this.postcard.height - (margin * 2);
         this.context.shadowOffsetX = 0;
@@ -181,29 +191,26 @@
         this.context.shadowOffsetY = 2;
         this.context.shadowBlur = 2;
         this.context.setFontSize(18);
-        this.context.fillText(
-          `${this.userInfo.nickName} ──`,
-          width - (margin + 8),
-          height + (margin * 2),
-          100,
-        );
+
+        const tX = width - (margin + 24);
+        const tY = height + 80;
+        this.context.fillText(`── ${this.userInfo.nickName}`, tX, tY, 100);
         const quotes = [
           '早放学，早回家!',
+          '吃饭、睡觉、撸猫',
+          'Beauty is found within.',
         ];
 
         const index = parseInt(Math.random() * quotes.length, 0);
         const quote = quotes[index];
-        this.context.fillText(
-          quote,
-          margin,
-          height + (margin * 3.5),
-          width,
-        );
+        const qX = margin;
+        const qY = height + (margin + 96);
+        this.context.fillText(quote, qX, qY, width);
 
         this.context.save();
 
-        const iX = margin * 1.5;
-        const iY = height + (margin);
+        const iX = margin + 16;
+        const iY = height + (margin + 16);
         const iW = 48;
         const iH = iW;
         this.context.beginPath();
@@ -227,7 +234,8 @@
   }
 
   .description {
-    position: relative;
+    position: absolute;
+    width: 100%;
     top: 30%;
     text-align: center;
     font-size: .28rem;
@@ -244,37 +252,6 @@
     border: .01rem solid #999999;
     border-radius: .06rem;
     box-shadow: 0 .2rem .4rem rgba(0, 0, 0, .15);
-  }
-
-  .options-layout {
-    position: absolute;
-    right: .48rem;
-    bottom: .68rem;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    justify-items: center;
-    z-index: 999;
-  }
-
-  .options-item {
-    width: .80rem;
-    height: .80rem;
-    background: aliceblue;
-    font-size: .32rem;
-    color: #333;
-    text-align: center;
-    line-height: .80rem;
-    border-radius: 50%;
-    box-shadow: 0 .2rem .4rem rgba(0, 0, 0, .15);
-    margin-left: .16rem;
-    transform: translate(1.48rem, 0);
-    transition: .8s cubic-bezier(.2, .8, .2, 1);
-  }
-
-  .options-item-isShow {
-    transform: translate(0, 0);
-    transition: .8s cubic-bezier(.2, .8, .2, 1);
   }
 
   canvas {
