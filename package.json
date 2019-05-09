@@ -1,81 +1,11 @@
 {
-  "name": "hongen-ek-wxapp",
-  "version": "1.0.0",
-  "description": "洪恩EK微信小程序版",
-  "author": "Hongen Education <hongen.com>",
-  "private": true,
+  "name": "demo",
+  "version": "1.0.1",
   "scripts": {
-    "dev": "node build/dev-server.js",
-    "start": "node build/dev-server.js",
-    "build": "node build/build.js",
-    "lint": "eslint --ext .js,.vue src"
-  },
-  "dependencies": {
-    "jsrsasign": "^8.0.12",
-    "mpvue": "^1.0.13",
-    "vue": "^2.5.17",
-    "vuex": "^2.3.1"
+    "compile": "./node_modules/typescript/bin/tsc",
+    "tsc": "node ./node_modules/typescript/lib/tsc.js"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^7.1.1",
-    "babel-loader": "^7.1.5",
-    "babel-plugin-transform-runtime": "^6.22.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-2": "^6.22.0",
-    "babel-register": "^6.22.0",
-    "chalk": "^2.4.1",
-    "connect-history-api-fallback": "^1.3.0",
-    "copy-webpack-plugin": "^4.5.3",
-    "css-loader": "^0.28.0",
-    "cssnano": "^3.10.0",
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb-base": "^11.1.3",
-    "eslint-friendly-formatter": "^3.0.0",
-    "eslint-import-resolver-webpack": "^0.8.1",
-    "eslint-loader": "^1.7.1",
-    "eslint-plugin-html": "^3.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eventsource-polyfill": "^0.9.6",
-    "express": "^4.16.4",
-    "extract-text-webpack-plugin": "^2.0.0",
-    "file-loader": "^0.11.1",
-    "friendly-errors-webpack-plugin": "^1.1.3",
-    "glob": "^7.1.3",
-    "html-webpack-plugin": "^2.28.0",
-    "http-proxy-middleware": "^0.17.3",
-    "moment": "^2.22.2",
-    "mpvue-loader": "^1.1.4",
-    "mpvue-template-compiler": "^1.0.13",
-    "mpvue-webpack-target": "^1.0.1",
-    "node-sass": "^4.9.3",
-    "optimize-css-assets-webpack-plugin": "^2.0.0",
-    "ora": "^1.2.0",
-    "portfinder": "^1.0.17",
-    "postcss-loader": "^2.1.6",
-    "postcss-mpvue-wxss": "^1.0.0",
-    "px2rpx-loader": "^0.1.10",
-    "rimraf": "^2.6.0",
-    "sass-loader": "^7.1.0",
-    "sass-resources-loader": "^1.3.3",
-    "semver": "^5.6.0",
-    "shelljs": "^0.7.6",
-    "url-loader": "^0.5.8",
-    "vue-style-loader": "^3.0.1",
-    "vue-template-compiler": "^2.5.17",
-    "webpack": "^2.7.0",
-    "webpack-bundle-analyzer": "^2.13.1",
-    "webpack-dev-middleware-hard-disk": "^1.12.1",
-    "webpack-merge": "^4.1.4",
-    "webpack-mpvue-asset-plugin": "^0.0.1"
-  },
-  "engines": {
-    "node": ">= 4.0.0",
-    "npm": ">= 3.0.0"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ]
+    "typescript": "^3.3.3333"
+  }
 }

@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="c-header">
+    <view class="info-bar"></view>
+    <view class="c-toolbar-header">
+        <block wx:if="{{ status === 'start' }}">
+            <view bindtap="cancelSavePicture" class="btn btn-cancel">放弃</view>
+            <view bindtap="savePicture" class="btn btn-confirm">保存</view>
+        </block>
+        <text wx:else="{{ status !== 'start' }}" class="title">@否他</text>
+    </view>
+  </view>
+  <block wx:if="{{ status === 'start' }}">
+    <canvas
+      canvas-id="canvas"
+      style="width: {{ canvasConfig.width }}px; height: {{ canvasConfig.height }}px;"
+    >
+    </canvas>
+  </block>
+  <view wx:else class="description">
+    选取一张图片作为背景，将信息合成为一张新图
+  </view>
+  <block wx:if="{{ status === 'completed' }}">
+    <image src="{{ postcard.path }}"/>
+  </block>
+  <block wx:if="{{ status === 'idle' }}">
+    <button
+      bindtap="addPostCard"
+      class="btn-float-lee">
+      创建明信片
+    </button>
+  </block>
+</view>
