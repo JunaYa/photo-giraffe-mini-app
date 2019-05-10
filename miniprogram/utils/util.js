@@ -12,7 +12,7 @@ function formatNumber(n) {
     const minute = date.getMinutes();
     const second = date.getSeconds();
   
-    const t1 = [year, month, day].map(formatNumber).join('/');
+    const t1 = [year, month, day].map(formatNumber).join('-');
     const t2 = [hour, minute, second].map(formatNumber).join(':');
   
     return `${t1} ${t2}`;
@@ -25,20 +25,29 @@ function formatNumber(n) {
     const canvasHeight = canvas.height;
     const pictureWidth = picture.width;
     const pictureHeight = picture.height;
-  
     const canvasRatio = canvasWidth / canvasHeight;
     const pictureRatio = pictureWidth / pictureHeight;
-  
-    if (canvasRatio > pictureRatio) {
-      width = (pictureWidth / pictureHeight) * canvasHeight;
-      height = canvasHeight;
+    let origin = 'portrait';
+    if (pictureWidth > pictureHeight) {
+      origin = 'landscape';
+      height = canvasWidth;
+      width = (pictureWidth / pictureHeight) * canvasWidth;
     } else {
+      origin = 'portrait';
       width = canvasWidth;
       height = (pictureHeight / pictureWidth) * canvasWidth;
     }
+    // if (canvasRatio > pictureRatio) {
+    //   width = (pictureWidth / pictureHeight) * canvasHeight;
+    //   height = canvasHeight;
+    // } else {
+    //   width = canvasWidth;
+    //   height = (pictureHeight / pictureWidth) * canvasWidth;
+    // }
     return {
       width,
       height,
+      origin,
     };
   }
   

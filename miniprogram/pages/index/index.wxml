@@ -16,17 +16,33 @@
     >
     </canvas>
   </block>
-  <view wx:else class="description">
-    选取一张图片作为背景，将信息合成为一张新图
-  </view>
-  <block wx:if="{{ status === 'completed' }}">
-    <image src="{{ postcard.path }}"/>
-  </block>
   <block wx:if="{{ status === 'idle' }}">
-    <button
+    <scroll-view 
+      wx:if="{{ postcards.length > 0 }}"
+      scroll-y
+      style="height: {{ canvasConfig.height }}px;"
+      class="scroll-view"
+      scroll-top="16"
+      >
+      <block wx:for="{{ postcards }}" wx:for-index="index" wx:for-item="postcard" wx:key="{{ index }}" >
+        <div style="width: {{ canvasConfig.width / 2 }}px;" class="postcard-wrap">
+          <image 
+            mode="aspectFit" 
+            style="width: {{ canvasConfig.width / 2 - 36 }}px;"
+            src="{{ postcard.url }}" 
+            class="postcard-image"/>
+        </div>
+      </block>
+    </scroll-view>
+    <view wx:else class="description">
+      选取一张图片作为背景，将信息合成为一张新图
+    </view>
+  </block>
+  <block wx:if="{{ status === 'idle' && buttonStatus === 0}}">
+    <div
       bindtap="addPostCard"
       class="btn-float-lee">
-      创建明信片
-    </button>
+      +
+    </div>
   </block>
 </view>

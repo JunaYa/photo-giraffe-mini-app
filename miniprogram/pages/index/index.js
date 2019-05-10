@@ -1,16 +1,18 @@
 "use strict";
 
-import { calPictureSize } from "../../utils/util";
+import { calPictureSize, formatTime } from "../../utils/util";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var app = getApp();
 Page({
     data: {
+        buttonStatus: 0, // 0: postcards.length === 0 1: postcards.length > 0
         status: 'idle',
         postcard: {
             width: 0,
             height: 0,
         },
+        postcards: [],
         canvasConfig: {
             width: 0,
             height: 0,
@@ -57,12 +59,13 @@ Page({
                 wx.getImageInfo({
                     src: url,
                     success: data => {
-                        const { width, height } = calPictureSize(
+                        const { width, height, origin } = calPictureSize(
                             self.data.canvasConfig,
                             data
                         );
                         data.width = width;
                         data.height = height;
+                        data.origin = origin;
                         self.setData({
                             status: 'start',
                             postcard: data
@@ -91,17 +94,25 @@ Page({
         const y = margin;
         const width = this.data.postcard.width - margin * 2;
         const height = this.data.postcard.height - margin * 2;
+        const isLandscape = this.data.postcard.origin === 'landscape';
         context.shadowOffsetX = 0;
         context.shadowOffsetY = 0;
         context.shadowBlur = 0;
-        context.drawImage(this.data.postcard.path, x, y, width, height);
+        if (isLandscape) {
+            context.rotate(90 * Math.PI / 180);
+            const offsetMargin = isLandscape ? rectW + 16 : 0;
+            context.drawImage(this.data.postcard.path, x, y - offsetMargin, width, height);
+            context.rotate(-90 * Math.PI / 180);
+        } else {
+            context.drawImage(this.data.postcard.path, x , y, width, height);
+        }
         context.fillStyle = "#333333";
         context.shadowOffsetX = 2;
         context.shadowOffsetY = 2;
         context.shadowBlur = 2;
         context.setFontSize(18);
-        const tX = width - (margin + 24);
-        const tY = height + 80;
+        const tX = isLandscape ? height - (margin + 24) : width - (margin + 24);
+        const tY = isLandscape ? width + 80 : height + 80;
         context.fillText(`── ${this.data.userInfo.nickName}`, tX, tY, 100);
         const quotes = [
             "早放学，早回家!",
@@ -111,36 +122,47 @@ Page({
         const index = parseInt(Math.random() * quotes.length, 0);
         const quote = quotes[index];
         const qX = margin;
-        const qY = height + (margin + 96);
+        const qY = isLandscape ? width + (margin + 96) : height + (margin + 96);
         context.fillText(quote, qX, qY, width);
         context.save();
         const iX = margin + 16;
-        const iY = height + (margin + 16);
+        const iY = isLandscape ? width + (margin + 16) : height + (margin + 16);
         const iW = 48;
         const iH = iW;
         context.beginPath();
         context.arc(iX + iW / 2, iY + iH / 2, iW / 2, 0, 2 * Math.PI);
         context.clip();
-        context.drawImage(avatarUrl, iX, iY, iW, iH);
+        context.drawImage(avatarUrl, iX , iY, iW, iH);
         context.restore();
         context.draw();
     },
     cancelSavePicture() {
         wx.vibrateShort();
+        wx.hideLoading();
         this.setData({ status: 'idle' });
     },
     setPostcards(path) {
-        const postcards = getPostcards();
-        postcards.push(path);
+        const postcardList = this.data.postcards || [];
+        const currentTime = formatTime(new Date());
+        const postcardItem = {
+            createAt: currentTime,
+            url: path,
+        }
         try {
-          wx.setStorageSync('postcards', postcards);
-          this.setData({ status: 'completed' });
+            postcardList.push(postcardItem);
+            this.setData({ postcards: postcardList });
+            wx.setStorageSync('postcards', postcardList);
         } catch (e) {
+            wx.showModal({
+                title: "出了一 .. 小问题",
+                content: "再次尝试一下吧!"
+            });
           //
         }
     },
     savePicture() {
         wx.vibrateShort();
+        const self = this;
         const margin = 0;
         const xValue = margin;
         const yValue = margin;
@@ -163,15 +185,16 @@ Page({
                             icon: "success"
                         });
                         setTimeout(() => {
-                            this.setData({ status: 'idle' })
+                            self.setData({ status: 'idle' })
                         }, 300);
-                        setPostcards(res.tempFilePath);
+                        self.setPostcards(res.tempFilePath);
                     }
                 });
             }
         });
     },
     onLoad: function() {
+        const list = wx.getStorageSync('postcards');
         const systemInfo = wx.getSystemInfoSync();
         const canvas = {
             width: 0,
@@ -181,6 +204,7 @@ Page({
         canvas.height = systemInfo.windowHeight - 78;
         const context = wx.createCanvasContext("canvas");
         this.setData({
+            postcards: list,
             context: context,
             canvasConfig: canvas
         });
