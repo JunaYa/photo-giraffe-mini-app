@@ -6,7 +6,7 @@
             <view bindtap="cancelSavePicture" class="btn btn-cancel">放弃</view>
             <view bindtap="savePicture" class="btn btn-confirm">保存</view>
         </block>
-        <text wx:else="{{ status !== 'start' }}" class="title">@否他</text>
+        <text wx:else="{{ status !== 'start' }}" class="title">@否TA</text>
     </view>
   </view>
   <block wx:if="{{ status === 'start' }}">
