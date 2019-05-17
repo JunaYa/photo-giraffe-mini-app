@@ -21,6 +21,7 @@ Page({
         userInfo: {},
         hasUserInfo: false,
         canIUse: wx.canIUse('button.open-type.getUserInfo'),
+        isEditting: false,
     },
     handleTouchStart() {},
     handleTouchMove() {},
@@ -193,6 +194,50 @@ Page({
             }
         });
     },
+    deletePostCard() {
+        wx.vibrateShort();
+        const postcardList = this.data.postcards.filter(item => !item.checked);
+        wx.setStorageSync('postcards', postcardList);
+        this.setData({
+            isEditting: false,
+            postcards: postcardList,
+        });
+    },
+    cancelEditting() {
+        wx.vibrateShort();
+        const postcardList = this.data.postcards.map(item => {
+            item.checked = false;
+            return item;
+        });
+        this.setData({
+            isEditting: false,
+            postcards: postcardList,
+        });
+    },
+    onClickListener(event) {
+        wx.vibrateShort();
+        if (this.data.isEditting) {
+            const postcard = event.currentTarget.dataset.postcard;
+            const postcardList = this.data.postcards.map(item => {
+                if (postcard.url === item.url) {
+                    item.checked = !item.checked;
+                }
+             return item;
+            });
+            this.setData({postcards: postcardList});
+        } else {
+            const postcard = event.currentTarget.dataset.postcard;
+            const urlList = this.data.postcards.map(item => item.url);
+            wx.previewImage({
+                current: postcard.url, // 当前显示图片的http链接
+                urls: urlList // 需要预览的图片http链接列表
+              })
+        }
+    },
+    onLongClickListener() {
+        wx.vibrateShort();
+        this.setData({isEditting: true});
+    },
     onLoad: function() {
         const list = wx.getStorageSync('postcards');
         const systemInfo = wx.getSystemInfoSync();
@@ -208,7 +253,7 @@ Page({
             context: context,
             canvasConfig: canvas
         });
-        var _this = this;
+        const _this = this;
         if (app.globalData.userInfo) {
             this.setData({
                 userInfo: app.globalData.userInfo,

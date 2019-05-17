@@ -14,6 +14,7 @@ App({
                             _this.globalData.userInfo = res.userInfo;
                             if (_this.userInfoReadyCallback) {
                                 _this.userInfoReadyCallback(res.userInfo);
+                                wx.setStorageSync('user', res.userInfo);
                             }
                         }
                     });

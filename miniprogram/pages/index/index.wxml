@@ -2,9 +2,13 @@
   <view class="c-header">
     <view class="info-bar"></view>
     <view class="c-toolbar-header">
-        <block wx:if="{{ status === 'start' }}">
-            <view bindtap="cancelSavePicture" class="btn btn-cancel">放弃</view>
-            <view bindtap="savePicture" class="btn btn-confirm">保存</view>
+        <block wx:if="{{ isEditting }}">
+            <view bind:tap="cancelEditting" class="btn btn-cancel">取消</view>
+            <view bind:tap="deletePostCard" class="btn btn-delete">删除</view>
+        </block>
+        <block wx:elif="{{ status === 'start' }}">
+            <view bind:tap="cancelSavePicture" class="btn btn-cancel">放弃</view>
+            <view bind:tap="savePicture" class="btn btn-confirm">保存</view>
         </block>
         <text wx:else="{{ status !== 'start' }}" class="title">@否TA</text>
     </view>
@@ -25,24 +29,31 @@
       scroll-top="16"
       >
       <block wx:for="{{ postcards }}" wx:for-index="index" wx:for-item="postcard" wx:key="{{ index }}" >
-        <div style="width: {{ canvasConfig.width / 2 }}px;" class="postcard-wrap">
+        <view 
+          style="width: {{ canvasConfig.width / 2 }}px;" 
+          class="postcard-wrap" 
+          data-postcard="{{postcard}}" 
+          bind:tap="onClickListener" 
+          bind:longpress="onLongClickListener">
           <image 
             mode="aspectFit" 
             style="width: {{ canvasConfig.width / 2 - 36 }}px;"
             src="{{ postcard.url }}" 
             class="postcard-image"/>
-        </div>
+            <icon wx:if="{{ isEditting }}" type="success" size="20" color="{{postcard.checked ? '#71BCB6' : '#999999'}}" />
+        </view>
       </block>
     </scroll-view>
     <view wx:else class="description">
       选取一张图片作为背景，将信息合成为一张新图
     </view>
   </block>
-  <block wx:if="{{ status === 'idle' && buttonStatus === 0}}">
-    <div
-      bindtap="addPostCard"
+  <block wx:if="{{ status === 'idle' && buttonStatus === 0 && !isEditting }}">
+    <button
+      bind:tap="addPostCard"
+      open-type="getUserInfo"
       class="btn-float-lee">
       +
-    </div>
+    </button>
   </block>
 </view>

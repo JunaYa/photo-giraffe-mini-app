@@ -18,9 +18,14 @@
     line-height: 56rpx;
     align-self: center;
     border-radius: 06rpx;
-    box-shadow: 0 8rpx 1rpx rgba(0, 0, 0, .15);
+    box-shadow: 0 8rpx 6rpx 2rpx rgba(0, 0, 0, .15);
   }
   .btn-cancel {
+    margin-right: 16rpx;
+  }
+  .btn-delete {
+    background: #d65878;
+    box-shadow: 0 8rpx 6rpx 2rpx rgba(141,87,110,0.50);
   }
   .btn-confirm {
     margin-left: 24rpx;
@@ -48,17 +53,19 @@ canvas {
   width: 86rpx;
   height: 86rpx;
   margin: 0 auto;
+  padding: 0;
   color: #FFFFFF;
   font-size: 48rpx;
   font-weight: bold;
-  background: #6bb6b0;
   border-radius: 50%;
-  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, .15);
   position: absolute;
   bottom: 32rpx;
   right: 16rpx;
   transform: translate(-50%, 0);
   text-align: center;
+  background: #D65878;
+  box-shadow: 4rpx 8rpx 6rpx 2rpx rgba(141,87,110,0.50);
+  box-shadow: 0 0 4rpx 4rpx rgba(169,65,92,0.50);
 }
   .scroll-view {
     position: absolute;
@@ -68,7 +75,14 @@ canvas {
   }
 
   .postcard-wrap {
+    position: relative;
     display: block;
     float: right;
     text-align: center;
+  }
+  icon {
+    position: absolute;
+    top: 16rpx;
+    right: 16rpx;
+    z-index: 9;
   }
