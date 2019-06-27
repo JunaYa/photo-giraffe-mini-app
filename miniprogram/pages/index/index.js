@@ -38,7 +38,9 @@ Page({
                 wx.hideLoading();
                 self.drawPostCard(res.tempFilePath);
             },
-            fail() {
+            fail(e) {
+                console.log(e);
+                this.setData({isEditting: false});
                 wx.hideLoading();
                 wx.showModal({
                     title: "出了一 .. 小问题",
@@ -119,6 +121,7 @@ Page({
             "早放学，早回家!",
             "吃饭、睡觉、撸猫",
             "Beauty is found within."
+            
         ];
         const index = parseInt(Math.random() * quotes.length, 0);
         const quote = quotes[index];
