@@ -1,0 +1,13 @@
+<!-- 画板 -->
+<view class="page">
+  <canvas 
+    id="canvas"
+    type="2d"
+    style="width: 100vw; height: 100vh;"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    bindtouchcancel="onTouchCancel"
+    binderror="onError"
+  ></canvas>
+</view>

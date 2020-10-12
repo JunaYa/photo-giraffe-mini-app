@@ -1,121 +1,17 @@
-function formatNumber(n) {
-    const str = n.toString();
-    return str[1] ? str : `0${str}`;
-  }
-  
-  export function formatTime(date) {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-  
-    const hour = date.getHours();
-    const minute = date.getMinutes();
-    const second = date.getSeconds();
-  
-    const t1 = [year, month, day].map(formatNumber).join('-');
-    const t2 = [hour, minute, second].map(formatNumber).join(':');
-  
-    return `${t1} ${t2}`;
-  }
-  
-  export function calPictureSize(canvas, picture) {
-    let width = 0;
-    let height = 0;
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
-    const pictureWidth = picture.width;
-    const pictureHeight = picture.height;
-    const canvasRatio = canvasWidth / canvasHeight;
-    const pictureRatio = pictureWidth / pictureHeight;
-    let origin = 'portrait';
-    if (pictureWidth > pictureHeight) {
-      origin = 'landscape';
-      height = canvasWidth;
-      width = (pictureWidth / pictureHeight) * canvasWidth;
-    } else {
-      origin = 'portrait';
-      width = canvasWidth;
-      height = (pictureHeight / pictureWidth) * canvasWidth;
-    }
-    // if (canvasRatio > pictureRatio) {
-    //   width = (pictureWidth / pictureHeight) * canvasHeight;
-    //   height = canvasHeight;
-    // } else {
-    //   width = canvasWidth;
-    //   height = (pictureHeight / pictureWidth) * canvasWidth;
-    // }
-    return {
-      width,
-      height,
-      origin,
-    };
-  }
-  
-  export function getPictureInfo(url) {
-    return new Promise((resolve) => {
-      wx.getImageInfo({
-        src: url,
-        success: data => resolve(data),
-      });
-    });
-  }
-  
-  export function selectPicture() {
-    return new Promise((resolve) => {
-      wx.chooseImage({
-        count: 1,
-        sourceType: ['album', 'camera'],
-        sizeType: ['original', 'compressed'],
-        success: (res) => {
-          if (res.tempFiles.length > 0) {
-            getPictureInfo(res.tempFiles[0].path).then((info) => {
-              resolve(info);
-            });
-          }
-        },
-      });
-    });
-  }
-  
-  export function fetchPicture(path) {
-    return new Promise((resolve) => {
-      wx.downloadFile({
-        url: path,
-        success(res) {
-          if (res.statusCode === '200') {
-            resolve(res.tempFilePath);
-          }
-        },
-      });
-    });
-  }
-  
-  export function getPostcards() {
-    let postcards = [];
-    try {
-      postcards = wx.getStorageSync('postcards');
-    } catch (e) {
-      //
-    }
-    return postcards || [];
-  }
-  
-  export function setPostcards(path) {
-    const postcards = getPostcards();
-    postcards.push(path);
-    try {
-      wx.setStorageSync('postcards', postcards);
-    } catch (e) {
-      //
-    }
-  }
-  
-  export default {
-    formatNumber,
-    formatTime,
-    calPictureSize,
-    getPictureInfo,
-    selectPicture,
-    getPostcards,
-    setPostcards,
-  };
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function formatTime(date) {
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour = date.getHours();
+    var minute = date.getMinutes();
+    var second = date.getSeconds();
+    return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':');
+}
+exports.formatTime = formatTime;
+var formatNumber = function (n) {
+    var str = n.toString();
+    return str[1] ? str : '0' + str;
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXRpbC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbInV0aWwudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSxTQUFnQixVQUFVLENBQUMsSUFBVTtJQUNuQyxJQUFNLElBQUksR0FBRyxJQUFJLENBQUMsV0FBVyxFQUFFLENBQUE7SUFDL0IsSUFBTSxLQUFLLEdBQUcsSUFBSSxDQUFDLFFBQVEsRUFBRSxHQUFHLENBQUMsQ0FBQTtJQUNqQyxJQUFNLEdBQUcsR0FBRyxJQUFJLENBQUMsT0FBTyxFQUFFLENBQUE7SUFDMUIsSUFBTSxJQUFJLEdBQUcsSUFBSSxDQUFDLFFBQVEsRUFBRSxDQUFBO0lBQzVCLElBQU0sTUFBTSxHQUFHLElBQUksQ0FBQyxVQUFVLEVBQUUsQ0FBQTtJQUNoQyxJQUFNLE1BQU0sR0FBRyxJQUFJLENBQUMsVUFBVSxFQUFFLENBQUE7SUFFaEMsT0FBTyxDQUFDLElBQUksRUFBRSxLQUFLLEVBQUUsR0FBRyxDQUFDLENBQUMsR0FBRyxDQUFDLFlBQVksQ0FBQyxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUMsR0FBRyxHQUFHLEdBQUcsQ0FBQyxJQUFJLEVBQUUsTUFBTSxFQUFFLE1BQU0sQ0FBQyxDQUFDLEdBQUcsQ0FBQyxZQUFZLENBQUMsQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLENBQUE7QUFDbEgsQ0FBQztBQVRELGdDQVNDO0FBRUQsSUFBTSxZQUFZLEdBQUcsVUFBQyxDQUFTO0lBQzdCLElBQU0sR0FBRyxHQUFHLENBQUMsQ0FBQyxRQUFRLEVBQUUsQ0FBQTtJQUN4QixPQUFPLEdBQUcsQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMsR0FBRyxDQUFDLENBQUMsQ0FBQyxHQUFHLEdBQUcsR0FBRyxDQUFBO0FBQ2pDLENBQUMsQ0FBQSIsInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBmdW5jdGlvbiBmb3JtYXRUaW1lKGRhdGU6IERhdGUpOiBzdHJpbmcge1xuICBjb25zdCB5ZWFyID0gZGF0ZS5nZXRGdWxsWWVhcigpXG4gIGNvbnN0IG1vbnRoID0gZGF0ZS5nZXRNb250aCgpICsgMVxuICBjb25zdCBkYXkgPSBkYXRlLmdldERhdGUoKVxuICBjb25zdCBob3VyID0gZGF0ZS5nZXRIb3VycygpXG4gIGNvbnN0IG1pbnV0ZSA9IGRhdGUuZ2V0TWludXRlcygpXG4gIGNvbnN0IHNlY29uZCA9IGRhdGUuZ2V0U2Vjb25kcygpXG5cbiAgcmV0dXJuIFt5ZWFyLCBtb250aCwgZGF5XS5tYXAoZm9ybWF0TnVtYmVyKS5qb2luKCcvJykgKyAnICcgKyBbaG91ciwgbWludXRlLCBzZWNvbmRdLm1hcChmb3JtYXROdW1iZXIpLmpvaW4oJzonKVxufVxuXG5jb25zdCBmb3JtYXROdW1iZXIgPSAobjogbnVtYmVyKSA9PiB7XG4gIGNvbnN0IHN0ciA9IG4udG9TdHJpbmcoKVxuICByZXR1cm4gc3RyWzFdID8gc3RyIDogJzAnICsgc3RyXG59XG4iXX0=
