@@ -45,7 +45,7 @@ Page({
    * Lifecycle function--Called when page load
    */
   onLoad: function (options) {
-    console.log('onLoad')
+    console.log('onLoad', options)
   },
 
   /**
@@ -296,6 +296,8 @@ Page({
     timeLine = []
     this._reset()
     _isEmpty = true
+    console.log(_isEmpty)
+    console.log(isTouching)
   },
 
 })

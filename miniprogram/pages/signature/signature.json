@@ -1,3 +1,6 @@
 {
-  "usingComponents": {}
+  "usingComponents": {},
+  "disableScroll": true,
+  "navigationStyle": "custom",
+  "pageOrientation": "landscape"
 }
