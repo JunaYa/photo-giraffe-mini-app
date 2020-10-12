@@ -1,277 +1,37 @@
 "use strict";
-
-import { calPictureSize, formatTime } from "../../utils/util";
-
 Object.defineProperty(exports, "__esModule", { value: true });
 var app = getApp();
 Page({
     data: {
-        buttonStatus: 0, // 0: postcards.length === 0 1: postcards.length > 0
-        status: 'idle',
-        postcard: {
-            width: 0,
-            height: 0,
-        },
-        postcards: [],
-        canvasConfig: {
-            width: 0,
-            height: 0,
-        },
-        context: null,
+        motto: '点击 “编译” 以构建',
         userInfo: {},
         hasUserInfo: false,
         canIUse: wx.canIUse('button.open-type.getUserInfo'),
-        isEditting: false,
     },
-    handleTouchStart() {},
-    handleTouchMove() {},
-    handleTouchEnd() {},
-    handleTouchCancel() {},
-    getPicture() {
-        const self = this;
-        wx.showLoading({
-            title: "努力加载ing…"
-        });
-        wx.downloadFile({
-            url: self.data.userInfo.avatarUrl,
-            success(res) {
-                wx.hideLoading();
-                self.drawPostCard(res.tempFilePath);
-            },
-            fail(e) {
-                console.log(e);
-                this.setData({isEditting: false});
-                wx.hideLoading();
-                wx.showModal({
-                    title: "出了一 .. 小问题",
-                    content: "可能是网络的小问题，再次尝试一下吧!"
-                });
-            }
+    bindViewTap: function () {
+        wx.navigateTo({
+            url: '../logs/logs'
         });
     },
-    addPostCard() {
-        const self = this;
-        wx.vibrateShort();
-        wx.chooseImage({
-            count: 1,
-            sourceType: ["album", "camera"],
-            sizeType: ["original", "compressed"],
-            success: res => {
-                if (res.tempFiles.length <= 0) return;
-                const url = res.tempFiles[0].path;
-                wx.getImageInfo({
-                    src: url,
-                    success: data => {
-                        const { width, height, origin } = calPictureSize(
-                            self.data.canvasConfig,
-                            data
-                        );
-                        data.width = width;
-                        data.height = height;
-                        data.origin = origin;
-                        self.setData({
-                            status: 'start',
-                            postcard: data
-                        });
-                        self.getPicture();
-                        //self.drawPostCard();
-                    }
-                });
-            }
-        });
-    },
-    drawPostCard(avatarUrl) {
-        if (!this.data.postcard) return;
-        const blur = 8;
-        let context = this.data.context;
-        context.fillStyle = "#fefefe";
-        context.shadowOffsetX = 2;
-        context.shadowOffsetY = 2;
-        context.shadowColor = "#999999";
-        context.shadowBlur = blur;
-        const rectW = this.data.canvasConfig.width - blur * 2;
-        const rectH = this.data.canvasConfig.height - blur * 2;
-        context.fillRect(8, 8, rectW, rectH);
-        const margin = 28;
-        const x = margin;
-        const y = margin;
-        const width = this.data.postcard.width - margin * 2;
-        const height = this.data.postcard.height - margin * 2;
-        const isLandscape = this.data.postcard.origin === 'landscape';
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
-        context.shadowBlur = 0;
-        if (isLandscape) {
-            context.rotate(90 * Math.PI / 180);
-            const offsetMargin = isLandscape ? rectW + 16 : 0;
-            context.drawImage(this.data.postcard.path, x, y - offsetMargin, width, height);
-            context.rotate(-90 * Math.PI / 180);
-        } else {
-            context.drawImage(this.data.postcard.path, x , y, width, height);
-        }
-        context.fillStyle = "#333333";
-        context.shadowOffsetX = 2;
-        context.shadowOffsetY = 2;
-        context.shadowBlur = 2;
-        context.setFontSize(18);
-        const tX = isLandscape ? height - (margin + 24) : width - (margin + 24);
-        const tY = isLandscape ? width + 80 : height + 80;
-        context.fillText(`── ${this.data.userInfo.nickName}`, tX, tY, 100);
-        const quotes = [
-            "早放学，早回家!",
-            "吃饭、睡觉、撸猫",
-            "Beauty is found within."
-            
-        ];
-        const index = parseInt(Math.random() * quotes.length, 0);
-        const quote = quotes[index];
-        const qX = margin;
-        const qY = isLandscape ? width + (margin + 96) : height + (margin + 96);
-        context.fillText(quote, qX, qY, width);
-        context.save();
-        const iX = margin + 16;
-        const iY = isLandscape ? width + (margin + 16) : height + (margin + 16);
-        const iW = 48;
-        const iH = iW;
-        context.beginPath();
-        context.arc(iX + iW / 2, iY + iH / 2, iW / 2, 0, 2 * Math.PI);
-        context.clip();
-        context.drawImage(avatarUrl, iX , iY, iW, iH);
-        context.restore();
-        context.draw();
-    },
-    cancelSavePicture() {
-        wx.vibrateShort();
-        wx.hideLoading();
-        this.setData({ status: 'idle' });
-    },
-    setPostcards(path) {
-        const postcardList = this.data.postcards || [];
-        const currentTime = formatTime(new Date());
-        const postcardItem = {
-            createAt: currentTime,
-            url: path,
-        }
-        try {
-            postcardList.push(postcardItem);
-            this.setData({ postcards: postcardList });
-            wx.setStorageSync('postcards', postcardList);
-        } catch (e) {
-            wx.showModal({
-                title: "出了一 .. 小问题",
-                content: "再次尝试一下吧!"
-            });
-          //
-        }
-    },
-    savePicture() {
-        wx.vibrateShort();
-        const self = this;
-        const margin = 0;
-        const xValue = margin;
-        const yValue = margin;
-        const canvasWidth = this.data.canvasConfig.width;
-        const canvasHeight = this.data.canvasConfig.height;
-        wx.canvasToTempFilePath({
-            x: xValue,
-            y: yValue,
-            width: canvasWidth,
-            height: canvasHeight,
-            destWidth: canvasWidth * 2,
-            destHeight: canvasHeight * 2,
-            canvasId: "canvas",
-            success(res) {
-                wx.saveImageToPhotosAlbum({
-                    filePath: res.tempFilePath,
-                    success: () => {
-                        wx.showToast({
-                            title: "保存成功!",
-                            icon: "success"
-                        });
-                        setTimeout(() => {
-                            self.setData({ status: 'idle' })
-                        }, 300);
-                        self.setPostcards(res.tempFilePath);
-                    }
-                });
-            }
-        });
-    },
-    deletePostCard() {
-        wx.vibrateShort();
-        const postcardList = this.data.postcards.filter(item => !item.checked);
-        wx.setStorageSync('postcards', postcardList);
-        this.setData({
-            isEditting: false,
-            postcards: postcardList,
-        });
-    },
-    cancelEditting() {
-        wx.vibrateShort();
-        const postcardList = this.data.postcards.map(item => {
-            item.checked = false;
-            return item;
-        });
-        this.setData({
-            isEditting: false,
-            postcards: postcardList,
-        });
-    },
-    onClickListener(event) {
-        wx.vibrateShort();
-        if (this.data.isEditting) {
-            const postcard = event.currentTarget.dataset.postcard;
-            const postcardList = this.data.postcards.map(item => {
-                if (postcard.url === item.url) {
-                    item.checked = !item.checked;
-                }
-             return item;
-            });
-            this.setData({postcards: postcardList});
-        } else {
-            const postcard = event.currentTarget.dataset.postcard;
-            const urlList = this.data.postcards.map(item => item.url);
-            wx.previewImage({
-                current: postcard.url, // 当前显示图片的http链接
-                urls: urlList // 需要预览的图片http链接列表
-              })
-        }
-    },
-    onLongClickListener() {
-        wx.vibrateShort();
-        this.setData({isEditting: true});
-    },
-    onLoad: function() {
-        const list = wx.getStorageSync('postcards');
-        const systemInfo = wx.getSystemInfoSync();
-        const canvas = {
-            width: 0,
-            height: 0
-        };
-        canvas.width = systemInfo.windowWidth - 8;
-        canvas.height = systemInfo.windowHeight - 78;
-        const context = wx.createCanvasContext("canvas");
-        this.setData({
-            postcards: list,
-            context: context,
-            canvasConfig: canvas
-        });
-        const _this = this;
+    onLoad: function () {
+        var _this = this;
         if (app.globalData.userInfo) {
             this.setData({
                 userInfo: app.globalData.userInfo,
-                hasUserInfo: true
+                hasUserInfo: true,
             });
-        } else if (this.data.canIUse) {
-            app.userInfoReadyCallback = function(res) {
+        }
+        else if (this.data.canIUse) {
+            app.userInfoReadyCallback = function (res) {
                 _this.setData({
                     userInfo: res,
                     hasUserInfo: true
                 });
             };
-        } else {
+        }
+        else {
             wx.getUserInfo({
-                success: function(res) {
+                success: function (res) {
                     app.globalData.userInfo = res.userInfo;
                     _this.setData({
                         userInfo: res.userInfo,
@@ -281,4 +41,13 @@ Page({
             });
         }
     },
+    getUserInfo: function (e) {
+        console.log(e);
+        app.globalData.userInfo = e.detail.userInfo;
+        this.setData({
+            userInfo: e.detail.userInfo,
+            hasUserInfo: true
+        });
+    }
 });
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJpbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUlBLElBQU0sR0FBRyxHQUFHLE1BQU0sRUFBVSxDQUFBO0FBRTVCLElBQUksQ0FBQztJQUNILElBQUksRUFBRTtRQUNKLEtBQUssRUFBRSxhQUFhO1FBQ3BCLFFBQVEsRUFBRSxFQUFFO1FBQ1osV0FBVyxFQUFFLEtBQUs7UUFDbEIsT0FBTyxFQUFFLEVBQUUsQ0FBQyxPQUFPLENBQUMsOEJBQThCLENBQUM7S0FDcEQ7SUFFRCxXQUFXO1FBQ1QsRUFBRSxDQUFDLFVBQVUsQ0FBQztZQUNaLEdBQUcsRUFBRSxjQUFjO1NBQ3BCLENBQUMsQ0FBQTtJQUNKLENBQUM7SUFDRCxNQUFNO1FBQU4saUJBMkJDO1FBMUJDLElBQUksR0FBRyxDQUFDLFVBQVUsQ0FBQyxRQUFRLEVBQUU7WUFDM0IsSUFBSSxDQUFDLE9BQVEsQ0FBQztnQkFDWixRQUFRLEVBQUUsR0FBRyxDQUFDLFVBQVUsQ0FBQyxRQUFRO2dCQUNqQyxXQUFXLEVBQUUsSUFBSTthQUNsQixDQUFDLENBQUE7U0FDSDthQUFNLElBQUksSUFBSSxDQUFDLElBQUksQ0FBQyxPQUFPLEVBQUM7WUFHM0IsR0FBRyxDQUFDLHFCQUFxQixHQUFHLFVBQUMsR0FBRztnQkFDOUIsS0FBSSxDQUFDLE9BQVEsQ0FBQztvQkFDWixRQUFRLEVBQUUsR0FBRztvQkFDYixXQUFXLEVBQUUsSUFBSTtpQkFDbEIsQ0FBQyxDQUFBO1lBQ0osQ0FBQyxDQUFBO1NBQ0Y7YUFBTTtZQUVMLEVBQUUsQ0FBQyxXQUFXLENBQUM7Z0JBQ2IsT0FBTyxFQUFFLFVBQUEsR0FBRztvQkFDVixHQUFHLENBQUMsVUFBVSxDQUFDLFFBQVEsR0FBRyxHQUFHLENBQUMsUUFBUSxDQUFBO29CQUN0QyxLQUFJLENBQUMsT0FBUSxDQUFDO3dCQUNaLFFBQVEsRUFBRSxHQUFHLENBQUMsUUFBUTt3QkFDdEIsV0FBVyxFQUFFLElBQUk7cUJBQ2xCLENBQUMsQ0FBQTtnQkFDSixDQUFDO2FBQ0YsQ0FBQyxDQUFBO1NBQ0g7SUFDSCxDQUFDO0lBRUQsV0FBVyxZQUFDLENBQU07UUFDaEIsT0FBTyxDQUFDLEdBQUcsQ0FBQyxDQUFDLENBQUMsQ0FBQTtRQUNkLEdBQUcsQ0FBQyxVQUFVLENBQUMsUUFBUSxHQUFHLENBQUMsQ0FBQyxNQUFNLENBQUMsUUFBUSxDQUFBO1FBQzNDLElBQUksQ0FBQyxPQUFRLENBQUM7WUFDWixRQUFRLEVBQUUsQ0FBQyxDQUFDLE1BQU0sQ0FBQyxRQUFRO1lBQzNCLFdBQVcsRUFBRSxJQUFJO1NBQ2xCLENBQUMsQ0FBQTtJQUNKLENBQUM7Q0FDRixDQUFDLENBQUEiLCJzb3VyY2VzQ29udGVudCI6WyIvL2luZGV4LmpzXG4vL+iOt+WPluW6lOeUqOWunuS+i1xuaW1wb3J0IHsgSU15QXBwIH0gZnJvbSAnLi4vLi4vYXBwJ1xuXG5jb25zdCBhcHAgPSBnZXRBcHA8SU15QXBwPigpXG5cblBhZ2Uoe1xuICBkYXRhOiB7XG4gICAgbW90dG86ICfngrnlh7sg4oCc57yW6K+R4oCdIOS7peaehOW7uicsXG4gICAgdXNlckluZm86IHt9LFxuICAgIGhhc1VzZXJJbmZvOiBmYWxzZSxcbiAgICBjYW5JVXNlOiB3eC5jYW5JVXNlKCdidXR0b24ub3Blbi10eXBlLmdldFVzZXJJbmZvJyksXG4gIH0sXG4gIC8v5LqL5Lu25aSE55CG5Ye95pWwXG4gIGJpbmRWaWV3VGFwKCkge1xuICAgIHd4Lm5hdmlnYXRlVG8oe1xuICAgICAgdXJsOiAnLi4vbG9ncy9sb2dzJ1xuICAgIH0pXG4gIH0sXG4gIG9uTG9hZCgpIHtcbiAgICBpZiAoYXBwLmdsb2JhbERhdGEudXNlckluZm8pIHtcbiAgICAgIHRoaXMuc2V0RGF0YSEoe1xuICAgICAgICB1c2VySW5mbzogYXBwLmdsb2JhbERhdGEudXNlckluZm8sXG4gICAgICAgIGhhc1VzZXJJbmZvOiB0cnVlLFxuICAgICAgfSlcbiAgICB9IGVsc2UgaWYgKHRoaXMuZGF0YS5jYW5JVXNlKXtcbiAgICAgIC8vIOeUseS6jiBnZXRVc2VySW5mbyDmmK/nvZHnu5zor7fmsYLvvIzlj6/og73kvJrlnKggUGFnZS5vbkxvYWQg5LmL5ZCO5omN6L+U5ZueXG4gICAgICAvLyDmiYDku6XmraTlpITliqDlhaUgY2FsbGJhY2sg5Lul6Ziy5q2i6L+Z56eN5oOF5Ya1XG4gICAgICBhcHAudXNlckluZm9SZWFkeUNhbGxiYWNrID0gKHJlcykgPT4ge1xuICAgICAgICB0aGlzLnNldERhdGEhKHtcbiAgICAgICAgICB1c2VySW5mbzogcmVzLFxuICAgICAgICAgIGhhc1VzZXJJbmZvOiB0cnVlXG4gICAgICAgIH0pXG4gICAgICB9XG4gICAgfSBlbHNlIHtcbiAgICAgIC8vIOWcqOayoeaciSBvcGVuLXR5cGU9Z2V0VXNlckluZm8g54mI5pys55qE5YW85a655aSE55CGXG4gICAgICB3eC5nZXRVc2VySW5mbyh7XG4gICAgICAgIHN1Y2Nlc3M6IHJlcyA9PiB7XG4gICAgICAgICAgYXBwLmdsb2JhbERhdGEudXNlckluZm8gPSByZXMudXNlckluZm9cbiAgICAgICAgICB0aGlzLnNldERhdGEhKHtcbiAgICAgICAgICAgIHVzZXJJbmZvOiByZXMudXNlckluZm8sXG4gICAgICAgICAgICBoYXNVc2VySW5mbzogdHJ1ZVxuICAgICAgICAgIH0pXG4gICAgICAgIH1cbiAgICAgIH0pXG4gICAgfVxuICB9LFxuXG4gIGdldFVzZXJJbmZvKGU6IGFueSkge1xuICAgIGNvbnNvbGUubG9nKGUpXG4gICAgYXBwLmdsb2JhbERhdGEudXNlckluZm8gPSBlLmRldGFpbC51c2VySW5mb1xuICAgIHRoaXMuc2V0RGF0YSEoe1xuICAgICAgdXNlckluZm86IGUuZGV0YWlsLnVzZXJJbmZvLFxuICAgICAgaGFzVXNlckluZm86IHRydWVcbiAgICB9KVxuICB9XG59KVxuIl19

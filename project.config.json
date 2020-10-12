@@ -14,7 +14,7 @@
   },
   "setting": {
     "urlCheck": true,
-    "es6": true,
+    "es6": false,
     "enhance": false,
     "postcss": true,
     "preloadBackgroundData": false,
@@ -46,5 +46,30 @@
   "appid": "wxcbe6528d3439fc28",
   "simulatorType": "wechat",
   "simulatorPluginLibVersion": {},
-  "condition": {}
+  "condition": {
+    "search": {
+      "current": -1,
+      "list": []
+    },
+    "conversation": {
+      "current": -1,
+      "list": []
+    },
+    "plugin": {
+      "current": -1,
+      "list": []
+    },
+    "game": {
+      "current": -1,
+      "list": []
+    },
+    "gamePlugin": {
+      "current": -1,
+      "list": []
+    },
+    "miniprogram": {
+      "current": -1,
+      "list": []
+    }
+  }
 }
