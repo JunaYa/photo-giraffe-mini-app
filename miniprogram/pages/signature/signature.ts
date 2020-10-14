@@ -44,7 +44,7 @@ Page({
   /**
    * Lifecycle function--Called when page load
    */
-  onLoad: function (options) {
+  onLoad: function (options: any) {
     console.log('onLoad', options)
   },
 
