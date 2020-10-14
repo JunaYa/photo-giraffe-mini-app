@@ -1,13 +1,13 @@
 //index.js
 //获取应用实例
-import { IMyApp } from '../../app'
+
 import {
   calPictureSize,
   selectPicture,
   // setPostcards,
 } from '../../utils/util';
 
-const app = getApp<IMyApp>()
+const app = getApp<IAppOption>()
 
 let _context:any = null
 
@@ -39,13 +39,16 @@ Page({
 
     if (app.globalData.userInfo) {
       this.setData!({
-        userInfo: app.globalData.userInfo,
+        userInfo: {
+          ...app.globalData.userInfo,
+          picturePath: '',
+        },
         hasUserInfo: true,
       })
     } else if (this.data.canIUse){
       // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
       // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = (res) => {
+      app.userInfoReadyCallback = (res: any) => {
         this.setData!({
           userInfo: res,
           hasUserInfo: true
